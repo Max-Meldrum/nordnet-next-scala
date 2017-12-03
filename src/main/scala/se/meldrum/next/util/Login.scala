@@ -28,7 +28,7 @@ import scala.io.Source
 object Login {
 
   // https://gist.github.com/urcadox/6173812
-  def decodePublicKey(encodedKey: Array[Byte]): Option[PublicKey] = {
+  private def decodePublicKey(encodedKey: Array[Byte]): Option[PublicKey] = {
     scala.util.control.Exception.allCatch.opt {
       val spec = new X509EncodedKeySpec(encodedKey)
       val factory = KeyFactory.getInstance("RSA")
@@ -37,31 +37,25 @@ object Login {
   }
 
   // https://gist.github.com/urcadox/6173812
-  def decodePublicKey(encodedKey: String): Option[PublicKey] =
+  private def decodePublicKey(encodedKey: String): Option[PublicKey] =
     decodePublicKey(Base64.getDecoder.decode(encodedKey))
 
 
-  // Can be made nicer
-  def getSessionKey(config: Config): Option[String] = {
+  def getAuthParam(config: Config): Option[String] = {
     val l = Base64.getEncoder
       .encodeToString(s"${config.username}:${config.password}:${System.currentTimeMillis().toString}".getBytes)
 
-    val file = config.pemfile
-    val lines = Source.fromFile(file)
+    val lines = Source.fromFile(config.pemfile)
       .getLines()
-      .filter(!_.startsWith("----"))
+      .filter(!_.startsWith("----")) // Ignore ---- BEGIN KEY / END KEY
       .mkString
 
-    val pub = decodePublicKey(lines)
-
-    pub match {
-      case Some(publicKey) =>
-        val cipher = Cipher.getInstance("RSA")
-        cipher.init(Cipher.ENCRYPT_MODE, publicKey)
-        val fin = cipher.doFinal(l.getBytes("UTF-8"))
-        val authParam = Base64.getEncoder.encodeToString(fin)
-        Some(URLEncoder.encode(authParam, "UTF-8"))
-      case None => None
+    decodePublicKey(lines).map { pub =>
+      val cipher = Cipher.getInstance("RSA")
+      cipher.init(Cipher.ENCRYPT_MODE, pub)
+      val encryptedBytes = cipher.doFinal(l.getBytes("UTF-8"))
+      val authParam = Base64.getEncoder.encodeToString(encryptedBytes)
+      URLEncoder.encode(authParam, "UTF-8")
     }
   }
 }
