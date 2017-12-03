@@ -16,6 +16,13 @@
 
 package se.meldrum.next.util
 
+import scala.io.BufferedSource
 
-case class Config(username: String, password: String, baseURL: String, pemfile: String)
+
+case class Config(username: String, password: String, baseURL: String, pemfile: BufferedSource) {
+  require(!username.isEmpty)
+  require(!password.isEmpty)
+  require(!baseURL.isEmpty)
+  require(!pemfile.isEmpty)
+}
 

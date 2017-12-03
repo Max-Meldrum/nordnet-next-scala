@@ -22,8 +22,6 @@ import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 import javax.crypto.Cipher
 
-import scala.io.Source
-
 
 object Login {
 
@@ -45,12 +43,12 @@ object Login {
     val l = Base64.getEncoder
       .encodeToString(s"${config.username}:${config.password}:${System.currentTimeMillis().toString}".getBytes)
 
-    val lines = Source.fromFile(config.pemfile)
-      .getLines()
-      .filter(!_.startsWith("----")) // Ignore ---- BEGIN KEY / END KEY
-      .mkString
+    val rsa = config.pemfile
+    .getLines()
+    .filter(!_.startsWith("----")) // Ignore ---- BEGIN KEY / END KEY
+    .mkString
 
-    decodePublicKey(lines).map { pub =>
+    decodePublicKey(rsa).map { pub =>
       val cipher = Cipher.getInstance("RSA")
       cipher.init(Cipher.ENCRYPT_MODE, pub)
       val encryptedBytes = cipher.doFinal(l.getBytes("UTF-8"))
