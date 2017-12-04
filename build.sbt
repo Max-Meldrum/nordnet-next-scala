@@ -11,7 +11,10 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
   "org.http4s" %% "http4s-circe" % http4sVersion,
-  "org.scalatest" %% "scalatest" % "3.0.4" % "test"
-
+  "org.scalatest" %% "scalatest" % "3.0.4" % "test",
+  // Optional for auto-derivation of JSON codecs
+  "io.circe" %% "circe-generic" % "0.8.0",
+  // Optional for string interpolation to JSON model
+  "io.circe" %% "circe-literal" % "0.8.0"
 )
     

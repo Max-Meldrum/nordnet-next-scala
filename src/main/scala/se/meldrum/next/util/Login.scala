@@ -22,6 +22,8 @@ import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 import javax.crypto.Cipher
 
+import se.meldrum.next.models.Config
+
 
 object Login {
 

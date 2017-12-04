@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-package se.meldrum.next.util
-
-import scala.io.BufferedSource
+package se.meldrum.next.models
 
 
-case class Config(username: String, password: String, baseURL: String, pemfile: BufferedSource) {
-  require(!username.isEmpty)
-  require(!password.isEmpty)
-  require(!baseURL.isEmpty)
-  require(!pemfile.isEmpty)
-}
-
+case class Status(timestamp: Long, valid_version: Boolean, system_running: Boolean, message: String)
