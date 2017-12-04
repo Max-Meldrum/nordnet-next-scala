@@ -22,7 +22,7 @@ import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 import javax.crypto.Cipher
 
-import se.meldrum.next.models.Config
+import se.meldrum.next.models.NextConfig
 
 
 object Login {
@@ -41,7 +41,7 @@ object Login {
     decodePublicKey(Base64.getDecoder.decode(encodedKey))
 
 
-  def getAuthParam(config: Config): Option[String] = {
+  def getAuthParam(config: NextConfig): Option[String] = {
     val l = Base64.getEncoder
       .encodeToString(s"${config.username}:${config.password}:${System.currentTimeMillis().toString}".getBytes)
 

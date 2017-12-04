@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package se.meldrum.next.models
+package se.meldrum.next.api
 
-import scala.io.BufferedSource
+import se.meldrum.next.models.{ErrorResponse, LoginResponse}
+import org.http4s.circe._
 
-
-case class Config(username: String, password: String, baseURL: String, pemfile: BufferedSource) {
-  require(!username.isEmpty)
-  require(!password.isEmpty)
-  require(!baseURL.isEmpty)
-  require(!pemfile.isEmpty)
+trait Encoders {
+  import io.circe.generic.auto._
+  implicit val loginResponse = jsonOf[LoginResponse]
+  implicit val ErrorResponse = jsonOf[ErrorResponse]
 }
-

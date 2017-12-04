@@ -23,24 +23,49 @@ import org.http4s.headers.`Content-Type`
 import org.http4s.headers.`Accept`
 import org.http4s.dsl._
 import org.http4s.circe._
-import se.meldrum.next.models.{Config, Status}
+import io.circe.syntax._
+import org.http4s.Status.Successful
+import se.meldrum.next.api.NextClient.NextRequest
+import se.meldrum.next.models._
+import se.meldrum.next.util.Login
 
-class NextClient(config: Config) {
+class NextClient(config: NextConfig) extends Encoders {
   private[this] val client = PooledHttp1Client()
-  private[this] val headers = List(`Content-Type`(MediaType.`application/json`), `Accept`(MediaType.`application/json`))
+  private[this] val headers = List(`Content-Type`(MediaType.`application/json`), `Accept`(MediaType.`application/json`)
+  , `Content-Type`(MediaType.`application/json`))
   implicit val strategy = Strategy.fromExecutionContext(scala.concurrent.ExecutionContext.Implicits.global)
 
   // To handle JSON decoding..
   import io.circe.generic.auto._
 
-  def getStatus(): Task[Status] = {
+  def getStatus(): Task[NextStatus] = {
     // This is not working... look into it
     //val uri = new Uri().withPath(config.baseURL)
     val uri = Uri.uri("https://api.test.nordnet.se/next/2/")
     val req = Request(GET, uri)
       .putHeaders(headers :_*)
 
-    client.expect(req)(jsonOf[Status])
+    client.expect(req)(jsonOf[NextStatus])
   }
 
+
+  def login(): Option[NextRequest[ErrorResponse, LoginResponse]] = {
+    val uri = Uri.uri("https://api.test.nordnet.se/next/2/login/")
+    val authParam = Login.getAuthParam(config)
+    authParam.map {p =>
+      val e = LoginRequest(p, "NEXTAPI2")
+      val post = Request(POST, uri)
+        .withBody(e.asJson)
+        .putHeaders(headers :_*)
+
+      client.fetch(post) {
+        case Successful(resp) => resp.as[LoginResponse].map(Right(_))
+        case resp => resp.as[ErrorResponse].map(Left(_))
+      }
+    }
+  }
+}
+
+object NextClient {
+  type NextRequest[A,B]= Task[Either[A,B]]
 }

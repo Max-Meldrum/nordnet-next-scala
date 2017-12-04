@@ -17,4 +17,4 @@
 package se.meldrum.next.models
 
 
-case class Status(timestamp: Long, valid_version: Boolean, system_running: Boolean, message: String)
+case class Feed(hostname: String, port: Int, encrypted: Boolean)
